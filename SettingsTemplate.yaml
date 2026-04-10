@@ -2,8 +2,9 @@ body:
   - type: dropdown
     attributes:
       name: default_browser
-      label: Choose a Browser or Profile
+      label: Default Browser
       defaultValue: Chrome
+      description: Select the primary browser to search when "Search Across All Browsers" is disabled.
       options:
         - Chrome
         - Firefox
@@ -24,30 +25,28 @@ body:
   - type: checkbox
     attributes:
       name: profile_last_updated
-      label: Select the Most Recently Used Profile
+      label: Auto-Detect Active Profile (Automatically selects the most recently modified browser profile)
       defaultValue: 'true'
   - type: inputWithFolderBtn
     attributes:
       name: custom_profile_path
-      label: Path to Profile Folder
+      label: Custom Profile Directory
       defaultValue: ''
-      description: Only needed if picked "Chromium Profile" or "Firefox Profile".
+      description: Required only if a custom "Chromium Profile" or "Firefox Profile" is selected above.
   - type: checkbox
     attributes:
       name: all_browsers_history
-      label: Combine History from All Browsers
+      label: Search Across All Browsers (Combines and deduplicates history from all supported browsers)
       defaultValue: 'true'
   - type: input
     attributes:
       name: history_limit
-      label: Number of History Items to Load 
+      label: History Limit (Per Browser)
       defaultValue: '1000'
-      description: This is the maximum number of history entries to load for each browser. The default is 1,000.
+      description: Maximum number of recent history entries to retrieve per browser. Default is 1000.
   - type: textarea
     attributes:
       name: blocked_domains
       label: Blocked Domains
       defaultValue: ''
-      description: Comma-separated list of domains to exclude from search results. (e.g., facebook.com, twitter.com)
-
-
+      description: Comma-separated list of domains to hide from search results (e.g., facebook.com, twitter.com).
