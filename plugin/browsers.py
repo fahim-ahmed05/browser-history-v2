@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import uuid
 import sqlite3
 import time
 from tempfile import gettempdir
@@ -122,12 +121,22 @@ class Browser:
 
     def _copy_database(self) -> str:
         """Copy the locked original DB to a uniquely named temp file for safe reading.
-
-        Includes retry logic to mitigate transient file locking issues.
+        Uses a stable cache file and checks modification time to avoid unnecessary copies.
         """
         tmp_dir = Path(gettempdir())
-        unique_name = f"bh_{self.name}_{uuid.uuid4().hex}.sqlite"
-        target = tmp_dir / unique_name
+        safe_name = self.name.replace(" ", "_")
+        cache_name = f"bh_{safe_name}_cache.sqlite"
+        target = tmp_dir / cache_name
+
+        # Check if already have a cached copy that is up to date
+        try:
+            if target.exists():
+                source_mtime = self.database_path.stat().st_mtime
+                target_mtime = target.stat().st_mtime
+                if source_mtime <= target_mtime:
+                    return str(target)
+        except OSError:
+            pass # Fallback to copying if stat fails
 
         last_err = None
         for attempt in range(3):
@@ -143,25 +152,9 @@ class Browser:
                 f"Failed copying history DB for '{self.name}' from '{self.database_path}' to '{target}': {last_err}"
             )
 
-        # Track multiple temp files (in case history() called many times)
-        if not hasattr(self, '_temp_paths'):
-            self._temp_paths = []
-        self._temp_paths.append(str(target))
         return str(target)
 
-    def __del__(self):  # best-effort cleanup of copied temp DBs
-        try:
-            if hasattr(self, '_temp_paths'):
-                for p in self._temp_paths:
-                    try:
-                        if p and os.path.exists(p):
-                            os.remove(p)
-                    except Exception:
-                        continue
-        except Exception:
-            pass
-
-    def history(self, limit: int = 100) -> List['HistoryItem']:
+    def history(self, search_term: str = "", limit: int = 100) -> List['HistoryItem']:
         db_path = self._copy_database()
 
         # Retry opening (handle rare cases where copy completes but FS metadata not flushed)
@@ -180,7 +173,15 @@ class Browser:
 
         try:
             cursor = connection.cursor()
-            cursor.execute(f"{self.query} LIMIT {limit}")
+            
+            if search_term:
+                search_param = f"%{search_term}%"
+                base, order = self.query.split(" ORDER BY ")
+                sql = f"{base} WHERE title LIKE ? OR url LIKE ? ORDER BY {order} LIMIT ?"
+                cursor.execute(sql, (search_param, search_param, limit))
+            else:
+                cursor.execute(f"{self.query} LIMIT ?", (limit,))
+                
             rows = cursor.fetchall()
         finally:
             connection.close()
@@ -220,7 +221,6 @@ class HistoryItem:
 
 def get(browser_name: str, custom_profile_path: Optional[str] = None, profile_last_updated: bool = False) -> Optional[Browser]:
     """Factory for Browser objects.
-
     Returns None if the resolved database cannot be found (FileNotFoundError).
     """
     browser_name = browser_name.lower()
