@@ -1,75 +1,65 @@
-# 🌟 Browser History Plugin for Flow Launcher
+# Browser History Plugin for Flow Launcher
 
-The **Browser History Plugin** for Flow Launcher allows you to quickly search and access your browsing history across multiple browsers. Whether you're looking for a specific webpage or want to revisit recent sites, this plugin makes it easy to find what you need with just a few keystrokes.
+The Browser History Plugin allows you to search your past web browsing directly from Flow Launcher. Whether you need to find an article you read yesterday or a website you visited weeks ago, this tool helps you find it instantly just by typing.
 
-## 📋 Features
+## Features
 
-- **Multi-Browser Support**: Access history from Chrome, Firefox, Edge, Brave, Opera, Vivaldi, Arc, Zen, Floorp, Thorium, Waterfox, and more.
-- **Custom Profiles**: Add custom Chromium-based or Firefox-based browser profiles for personalized history retrieval.
-- **Combined History**: Combine and sort history entries from all supported browsers into a single list.
-- **Profile Selection**: Automatically select the most recently updated profile or manually specify one.
-- **Domain Blocking**: Exclude specific domains from search results to filter out unwanted websites.
+* **Universal Search:** Search across all your installed browsers at the same time.
+* **Multi-Word Search:** Type words in any order to find what you are looking for (e.g., typing "youtube music" will easily find a page titled "Music - YouTube").
+* **Broad Compatibility:** Works automatically with Chrome, Firefox, Edge, Brave, Opera, Vivaldi, Arc, and many others.
+* **Profile Support:** If you share a computer or use separate "Work" and "Personal" browser profiles, the plugin can automatically detect the one you used most recently, or you can choose to search all of your profiles at once. 
+* **Hide Websites:** You can block specific websites (like social media or video streaming sites) so they don't clutter up your search results.
 
-## 🚀 Installation
+## Installation
 
-### Step 1: Install Flow Launcher
-Make sure you have [Flow Launcher](https://www.flowlauncher.com/)  installed on your system. If not, download and install it from the official website.
+The easiest way to install this plugin is directly through Flow Launcher.
 
-### Step 2: Install the Plugin
-1. Open Flow Launcher and go to **Settings > Plugin Store**.
-2. Search for "Browser History" in the store.
-3. Click **Install** to add the plugin to your Flow Launcher setup.
+**Standard Installation (Recommended):**
+1. Open Flow Launcher.
+2. Open your Flow Launcher Settings and click on the **Plugin Store** tab.
+3. Search for **Browser History**.
+4. Click **Install**. 
 
-Alternatively, you can manually install the plugin:
-1. Download the latest release.
-2. Extract the files and place the plugin folder in your Flow Launcher plugins directory: `%AppData%\FlowLauncher\Plugins`.
-3. Restart Flow Launcher to load the new plugin.
+**Manual Installation:**
+1. Download the latest release from GitHub.
+2. Open Flow Launcher, type `settings`, and press Enter.
+3. Go to the **Plugins** tab and click the folder icon to open your plugins directory.
+4. Drag and drop the downloaded folder into the directory.
+5. Restart Flow Launcher.
 
-### Step 3: Configure Settings
-The defaults are okay for 99% of users. But if you want to change anything, just go to Flow Launcher plugin settings.
+## Configuration
 
-## ⚙️ Configuration
+For most people, the plugin will work perfectly right out of the box. However, you can customize how it works by going into the plugin's settings in Flow Launcher. 
 
-The plugin provides several settings to customize its behavior:
+Here is what each setting does:
 
-| Setting Name                     | Description                                                                                   | Default Value       |
-|:----------------------------------|:-----------------------------------------------------------------------------------------------|:---------------------:|
-| **Choose a Browser or Profile**   | Select the browser or profile to use by default. Choose **Chromium Profile** or **Firefox Profile** to target a specific profile directory. | `Chrome`            |
-| **Select the Most Recently Used Profile** | When enabled, the plugin selects the most recently updated profile for browsers that support multiple profiles. | `true`             |
-| **Path to Profile Folder**       | Required ONLY if you select **Chromium Profile** or **Firefox Profile**. Must be a DIRECTORY (profile folder), not the History / places.sqlite file. | `N/A`                 |
-| **Combine History from All Browsers**              | When enabled, the plugin fetches and combines history from all supported browsers, including custom profiles. | `true`             |
-| **Number of History Items to Load**                | Set the maximum number of history entries to fetch per browser. Decrease this value if you experience slowdowns. | `1000`             |
-| **Blocked Domains**              | Comma-separated list of domains to exclude from search results (e.g., facebook.com, twitter.com). Leave empty to show all domains. | `N/A`               |
+* **Browser Selection:** By default, this is set to "All Browsers". You can change this if you only want to search one specific browser or a custom profile.
+* **Profile Search Mode:** Choose how the plugin handles browsers with multiple user profiles:
+    * **Active Profile:** Searches only the history of the profile you used most recently.
+    * **All Profiles:** Searches the history of every profile within the browser at the same time.
+* **Custom Profile Directory:** You can ignore this unless you selected "Custom Profile" in the first setting. Point this to the folder containing your profile data, and the plugin will automatically detect how to read it.
+* **History Limit:** This is the maximum number of past websites the plugin will load per profile. The default is 1,000. If Flow Launcher feels slow when you type, try lowering this number. 
+* **Blocked Domains:** Type in the web addresses of any sites you don't want showing up in your search results. Separate them with commas (for example: `facebook.com, twitter.com, youtube.com`).
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-### 1. Plugin Not Working
-- Ensure that Flow Launcher has permission to access your browser's history database.
-- Verify that the browser's profile folder exists and contains the required files (`History` for Chromium-based browsers, `places.sqlite` for Firefox).
-- If using a custom profile: the path MUST be the folder containing the file, e.g.:
-	- Chromium: `%LocalAppData%\BraveSoftware\Brave-Browser\User Data\Default`
-	- Firefox: `%AppData%\Mozilla\Firefox\Profiles\xxxxxxxx.default-release`
+**The plugin isn't showing any results.**
+* Make sure you have actually browsed the web on this computer so there is a history to search.
+* If you are an advanced user using a "Custom Profile Directory," make sure you pointed the setting to the exact folder containing your database files (like `History` or `places.sqlite`).
 
-### 2. Missing or Incorrect Results
-- Check the plugin settings to ensure the correct browser or profile is selected.
-- If using a custom profile, confirm that the provided path is a directory (not a file) and that it contains the expected database file.
+**Typing in Flow Launcher feels slow or laggy.**
+* You might have too much history loading at once. Go to the plugin settings and lower the **History Limit** (try changing it from 1000 to 500).
+* Alternatively, change your Browser Selection from "All Browsers" to a single specific browser so the plugin has less data to sort through.
 
-### 3. Slow Performance
-- Reduce the **History Limit** in the settings to fetch fewer entries.
-- Disable **Combine History** if you only need results from a single browser.
+**It's pulling up websites I don't want to see.**
+* Use the **Blocked Domains** setting to hide those specific websites.
 
-### 4. Errors in Logs
-- If you encounter errors, check the Flow Launcher logs for details: `%AppData%\FlowLauncher\Logs`
-- For custom profiles, the error message will include the attempted database path—verify it exists.
+## Reporting Issues
 
-## ❓ Reporting Issues
+If the plugin isn't working as expected, or if you have an idea to make it better, please let us know on GitHub:
 
-If you encounter any issues while using the plugin or have suggestions for improvement, please feel free to open an issue on GitHub:
+1. Go to the **Issues** tab on our GitHub page.
+2. Click **New Issue**.
+3. Describe what is going wrong. If you are seeing an error message in Flow Launcher, please include what it says. 
 
-1. Navigate to the **Issues** page.
-2. Click **New Issue** and provide the following information:
- - A clear description of the problem or feature request.
- - Steps to reproduce the issue (if applicable).
- - Any relevant error messages or logs from Flow Launcher.
-
-> **Note**: Before opening a new issue, please check the existing issues to see if your problem has already been reported.
+*Tip: Take a quick look at the other issues first to see if someone has already reported the same problem.*
