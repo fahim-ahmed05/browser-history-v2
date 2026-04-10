@@ -18,7 +18,8 @@ class BrowserHistory(Flox):
         self.custom_profile_path = self.settings.get('custom_profile_path', '')
         self.profile_last_updated = self.settings.get('profile_last_updated', False)
         self.all_browsers_history = self.settings.get('all_browsers_history', False)
-        self.history_limit = int(self.settings.get('history_limit', 10000))  # Default limit is 10000
+        # Default limit changed to 1000 to match the SettingsTemplate.yaml
+        self.history_limit = int(self.settings.get('history_limit', 1000)) 
         blocked_domains_str = self.settings.get('blocked_domains') or ''
         self.blocked_domains = [domain.strip().lower() for domain in blocked_domains_str.split(',') if domain.strip()]
         self.init_error = None  # Store any initialization error to display in query()
@@ -63,7 +64,7 @@ class BrowserHistory(Flox):
         try:
             domain = urlparse(url).netloc.lower()
             return any(blocked_domain in domain for blocked_domain in self.blocked_domains)
-        except:
+        except Exception: # explicitly catch Exception to avoid swallowing system exits
             return False
 
     def query(self, query):
@@ -98,9 +99,12 @@ class BrowserHistory(Flox):
                 source_items = [h for h in history_items if not self._is_domain_blocked(h.url)]
 
             for idx, item in enumerate(source_items):
+                # Format the datetime object to a 12-hour format string (e.g., '2026-04-10 02:30 PM')
+                time_str = item.timestamp().strftime('%Y-%m-%d %I:%M %p')
+                
                 self.add_item(
                     title=item.title,
-                    subtitle=f"{idx + 1}. {item.url}",
+                    subtitle=f"[{time_str}] {item.url}",
                     icon=ICON_HISTORY,
                     glyph=HISTORY_GLYPH,
                     method=self.browser_open,
