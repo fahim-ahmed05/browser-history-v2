@@ -4,6 +4,7 @@ import os
 import shutil
 import sqlite3
 import time
+import hashlib
 from tempfile import gettempdir
 from pathlib import Path
 from datetime import datetime
@@ -63,7 +64,7 @@ class Browser:
 
         # Resolve database path
         if custom_path:
-            # Enforce directory-only custom path
+            # Enforce directory-only custom path strictly
             if not isinstance(custom_path, Path):
                 custom_path = Path(custom_path)
             if not custom_path.exists() or not custom_path.is_dir():
@@ -86,7 +87,7 @@ class Browser:
 
         if not self.database_path or not self.database_path.exists():
             raise FileNotFoundError(
-                f"History database not found for '{name}'. Expected: '{self.database_path}'."
+                f"History database not found exactly at: '{self.database_path}'"
             )
 
     def _select_chromium_profile(self, base: Path, db_file: str, last_updated: bool) -> Path:
@@ -120,15 +121,16 @@ class Browser:
         return max(candidates, key=lambda p: p.stat().st_mtime) if last_updated else candidates[0]
 
     def _copy_database(self) -> str:
-        """Copy the locked original DB to a uniquely named temp file for safe reading.
-        Uses a stable cache file and checks modification time to avoid unnecessary copies.
-        """
+        """Copy the locked original DB to a uniquely named temp file for safe reading."""
         tmp_dir = Path(gettempdir())
         safe_name = self.name.replace(" ", "_")
-        cache_name = f"bh_{safe_name}_cache.sqlite"
+        
+        # Hash the absolute path to prevent cache collisions between different custom profiles
+        path_hash = hashlib.md5(str(self.database_path).encode('utf-8')).hexdigest()[:8]
+        cache_name = f"bh_{safe_name}_{path_hash}_cache.sqlite"
         target = tmp_dir / cache_name
 
-        # Check if already have a cached copy that is up to date
+        # Check if we already have a cached copy that is up to date
         try:
             if target.exists():
                 source_mtime = self.database_path.stat().st_mtime
@@ -145,7 +147,6 @@ class Browser:
                 break
             except OSError as e:
                 last_err = e
-                # Short backoff then retry
                 time.sleep(0.05 * (attempt + 1))
         else:
             raise OSError(
@@ -157,11 +158,11 @@ class Browser:
     def history(self, search_term: str = "", limit: int = 100) -> List['HistoryItem']:
         db_path = self._copy_database()
 
-        # Retry opening (handle rare cases where copy completes but FS metadata not flushed)
         last_err = None
         for attempt in range(3):
             try:
-                connection = sqlite3.connect(db_path)
+                # Open strictly in read-only mode using a URI
+                connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
                 break
             except OSError as e:
                 last_err = e
@@ -173,12 +174,23 @@ class Browser:
 
         try:
             cursor = connection.cursor()
-            
             if search_term:
-                search_param = f"%{search_term}%"
+                terms = search_term.split()
                 base, order = self.query.split(" ORDER BY ")
-                sql = f"{base} WHERE title LIKE ? OR url LIKE ? ORDER BY {order} LIMIT ?"
-                cursor.execute(sql, (search_param, search_param, limit))
+                
+                conditions = []
+                params = []
+                
+                # Require EVERY word to be present in either the title or the URL
+                for term in terms:
+                    conditions.append("(title LIKE ? OR url LIKE ?)")
+                    params.extend([f"%{term}%", f"%{term}%"])
+                
+                where_clause = " AND ".join(conditions)
+                sql = f"{base} WHERE {where_clause} ORDER BY {order} LIMIT ?"
+                
+                params.append(limit)
+                cursor.execute(sql, tuple(params))
             else:
                 cursor.execute(f"{self.query} LIMIT ?", (limit,))
                 
@@ -197,18 +209,15 @@ class Browser:
                 seconds = raw_time / 1_000_000
             else:
                 seconds = 0
-            # Clamp to valid range for datetime
             if seconds < 0:
                 seconds = 0
             return datetime.fromtimestamp(seconds)
         except OSError:
-            # Fallback to epoch if system clock range issue
             return datetime.fromtimestamp(0)
 
 
 class HistoryItem:
     """Single history row wrapper."""
-
     def __init__(self, browser: Browser, url: str, title: str, last_visit_time: int) -> None:
         self.browser = browser
         self.url = url
@@ -220,11 +229,26 @@ class HistoryItem:
 
 
 def get(browser_name: str, custom_profile_path: Optional[str] = None, profile_last_updated: bool = False) -> Optional[Browser]:
-    """Factory for Browser objects.
-    Returns None if the resolved database cannot be found (FileNotFoundError).
-    """
     browser_name = browser_name.lower()
     profile_last_updated = bool(profile_last_updated)
+
+    if browser_name == 'custom profile':
+        if not custom_profile_path:
+            raise ValueError('Custom profile path not provided in settings.')
+        
+        raw_path = os.path.expandvars(custom_profile_path.strip('"\' '))
+        path = Path(raw_path)
+        
+        if not path.exists() or not path.is_dir():
+            raise ValueError(f"Custom directory does not exist or is not a folder: {path}")
+
+        # Strictly check exact folder provided by the user
+        if (path / 'History').exists():
+            return Browser('custom profile', CHROMIUM_QUERY, 'chromium', custom_path=path, db_file='History')
+        elif (path / 'places.sqlite').exists():
+            return Browser('custom profile', FIREFOX_QUERY, 'unix_us', custom_path=path, db_file='places.sqlite')
+        else:
+            raise ValueError(f"Neither 'History' nor 'places.sqlite' exists exactly in: '{path}'")
 
     try:
         if browser_name in CHROMIUM_PROFILE_BASES or browser_name in FIXED_PATHS:
@@ -238,26 +262,68 @@ def get(browser_name: str, custom_profile_path: Optional[str] = None, profile_la
                 db_file='places.sqlite',
                 profile_last_updated=profile_last_updated,
             )
-        if browser_name == 'chromium profile':
-            if not custom_profile_path:
-                raise FileNotFoundError('Custom chromium profile path not provided.')
-            return Browser(
-                'chromium profile',
-                CHROMIUM_QUERY,
-                'chromium',
-                custom_path=Path(custom_profile_path),
-                db_file='History',
-            )
-        if browser_name == 'firefox profile':
-            if not custom_profile_path:
-                raise FileNotFoundError('Custom firefox profile path not provided.')
-            return Browser(
-                'firefox profile',
-                FIREFOX_QUERY,
-                'unix_us',
-                custom_path=Path(custom_profile_path),
-                db_file='places.sqlite',
-            )
         raise ValueError(f"Unsupported browser: {browser_name}")
     except FileNotFoundError:
         return None
+
+
+def get_all_profiles(browser_name: str, custom_profile_path: Optional[str] = None) -> List[Browser]:
+    browser_name = browser_name.lower()
+    browsers_list = []
+
+    if browser_name == 'custom profile':
+        if not custom_profile_path:
+            return []
+        
+        raw_path = os.path.expandvars(custom_profile_path.strip('"\' '))
+        path = Path(raw_path)
+        
+        if not path.exists() or not path.is_dir():
+            raise ValueError(f"Custom directory does not exist or is not a folder: {path}")
+
+        # Strictly check exact folder provided by the user
+        if (path / 'History').exists():
+            browsers_list.append(Browser('custom_profile_0', CHROMIUM_QUERY, 'chromium', custom_path=path, db_file='History'))
+        elif (path / 'places.sqlite').exists():
+            browsers_list.append(Browser('custom_profile_0', FIREFOX_QUERY, 'unix_us', custom_path=path, db_file='places.sqlite'))
+        else:
+            raise ValueError(f"Neither 'History' nor 'places.sqlite' exists exactly in: '{path}'")
+            
+        return browsers_list
+
+    if browser_name in CHROMIUM_PROFILE_BASES:
+        base = CHROMIUM_PROFILE_BASES[browser_name]
+        db_file = 'History'
+        query = CHROMIUM_QUERY
+        ts_type = 'chromium'
+    elif browser_name in FIREFOX_BASES:
+        base = FIREFOX_BASES[browser_name]
+        db_file = 'places.sqlite'
+        query = FIREFOX_QUERY
+        ts_type = 'unix_us'
+    else:
+        single_browser = get(browser_name)
+        return [single_browser] if single_browser else []
+
+    if not base.exists():
+        return []
+
+    if browser_name in CHROMIUM_PROFILE_BASES:
+        candidates = [p for p in base.iterdir() if p.is_dir() and (p / db_file).exists() and (p.name == 'Default' or p.name.startswith('Profile '))]
+    else:
+        candidates = [p for p in base.iterdir() if p.is_dir() and (p / db_file).exists()]
+
+    for idx, path in enumerate(candidates):
+        unique_name = f"{browser_name}_profile_{idx}"
+        try:
+            browsers_list.append(Browser(
+                unique_name,
+                query,
+                ts_type,
+                custom_path=path,
+                db_file=db_file
+            ))
+        except FileNotFoundError:
+            continue
+
+    return browsers_list
