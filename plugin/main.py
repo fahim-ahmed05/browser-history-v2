@@ -93,9 +93,9 @@ class BrowserHistory(Flox):
                         icon=ICON_BROWSER
                     )
             else:
-                history = self.browser.history(limit=self.history_limit) if self.browser else []
-                source_items = [h for h in history if query.lower() in h.title.lower() or query.lower() in h.url.lower()]
-                source_items = [h for h in source_items if not self._is_domain_blocked(h.url)]
+                # Pass query to the database layer directly
+                history_items = self.browser.history(search_term=query, limit=self.history_limit) if self.browser else []
+                source_items = [h for h in history_items if not self._is_domain_blocked(h.url)]
 
             for idx, item in enumerate(source_items):
                 self.add_item(
@@ -119,7 +119,8 @@ class BrowserHistory(Flox):
         self._warnings = []
         for browser in self.browsers:
             try:
-                combined_history.extend(browser.history(limit=self.history_limit))
+                # Let SQLite handle the searching
+                combined_history.extend(browser.history(search_term=query, limit=self.history_limit))
             except FileNotFoundError:
                 continue  # Skip browsers with missing databases
             except OSError as e:
@@ -127,25 +128,18 @@ class BrowserHistory(Flox):
                 self._warnings.append(f"{browser.name}: {e}")
                 continue
 
-        # Deduplicate by URL
+        # Deduplicate by URL and filter domains simultaneously
         seen_urls = set()
         unique_history = []
         for item in combined_history:
-            if item.url not in seen_urls:
+            if item.url not in seen_urls and not self._is_domain_blocked(item.url):
                 unique_history.append(item)
                 seen_urls.add(item.url)
 
         # Sort by normalized timestamp (most recent first)
         unique_history.sort(key=lambda x: x.timestamp(), reverse=True)
 
-        # Filter by query
-        filtered_history = [
-            item for item in unique_history
-            if query.lower() in item.title.lower() or query.lower() in item.url.lower()
-        ]
-
-        # Filter out blocked domains
-        return [item for item in filtered_history if not self._is_domain_blocked(item.url)]
+        return unique_history
 
     def context_menu(self, data):
         self.add_item(
