@@ -1,4 +1,4 @@
-# Browser History Plugin for Flow Launcher
+# Browser History V2 Plugin for Flow Launcher
 
 The Browser History Plugin allows you to search your past web browsing directly from Flow Launcher. Whether you need to find an article you read yesterday or a website you visited weeks ago, this tool helps you find it instantly just by typing.
 
@@ -17,7 +17,7 @@ The easiest way to install this plugin is directly through Flow Launcher.
 **Standard Installation (Recommended):**
 1. Open Flow Launcher.
 2. Open your Flow Launcher Settings and click on the **Plugin Store** tab.
-3. Search for **Browser History**.
+3. Search for **Browser History V2**.
 4. Click **Install**. 
 
 **Manual Installation:**
