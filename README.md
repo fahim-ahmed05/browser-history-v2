@@ -41,6 +41,14 @@ Here is what each setting does:
 * **History Limit:** This is the maximum number of past websites the plugin will load per profile. The default is 1,000. If Flow Launcher feels slow when you type, try lowering this number. 
 * **Blocked Domains:** Type in the web addresses of any sites you don't want showing up in your search results. Separate them with commas (for example: `facebook.com, twitter.com, youtube.com`).
 
+## Privacy & Data Handling
+
+To prevent search errors while your browser is open and actively locking the history database, this plugin creates a temporary read-only copy of the database to perform searches. 
+
+**Privacy Features:**
+* **Local Storage:** The cached databases are stored securely inside Flow Launcher's designated User Data directory (`%APPDATA%\FlowLauncher\Settings\Plugins\BrowserHistory\Cache`). If you uninstall or remove the plugin, the cache is automatically deleted with it.
+* **Portable Mode Security:** If you run Flow Launcher in Portable Mode on a USB drive, the plugin continuously monitors the name of the host computer. If the computer name changes, the plugin automatically wipes the cache folder to ensure your private history data does not accidentally travel to or get exposed on a different machine.
+
 ## Troubleshooting
 
 **The plugin isn't showing any results.**
