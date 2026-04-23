@@ -165,7 +165,7 @@ class BrowserHistory(Flox):
                 )
 
             for idx, item in enumerate(source_items):
-                time_str = item.timestamp().strftime("%Y-%m-%d %I:%M %p")
+                time_str = item.timestamp().strftime("%b %d, %Y %I:%M %p")
 
                 self.add_item(
                     title=item.title,
