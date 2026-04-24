@@ -21,10 +21,10 @@ The easiest way to install this plugin is directly through Flow Launcher.
 4. Click **Install**. 
 
 **Manual Installation:**
-1. Download the latest release from GitHub.
-2. Open Flow Launcher, type `settings`, and press Enter.
-3. Go to the **Plugins** tab and click the folder icon to open your plugins directory.
-4. Drag and drop the downloaded folder into the directory.
+1. Download the [latest release](https://github.com/fahim-ahmed05/browser-history-v2/releases/latest/download/browser-history-v2.zip) from GitHub.
+2. Open Flow Launcher **Settings** and go to **Plugin Store**.
+3. Click on Install **plugin from local path button** on the top right corner.
+4. Select the downloaded `.zip` file and click **Open**.
 5. Restart Flow Launcher.
 
 ## Configuration
@@ -46,8 +46,12 @@ Here is what each setting does:
 To prevent search errors while your browser is open and actively locking the history database, this plugin creates a temporary read-only copy of the database to perform searches. 
 
 **Privacy Features:**
-* **Local Storage:** The cached databases are stored securely inside Flow Launcher's designated User Data directory (`%APPDATA%\FlowLauncher\Settings\Plugins\BrowserHistory\Cache`). If you uninstall or remove the plugin, the cache is automatically deleted with it.
+* **Local Storage:** The cached databases are stored securely inside Flow Launcher's designated User Data directory (`%APPDATA%\FlowLauncher\Settings\Plugins\Browser History V2`). If you uninstall or remove the plugin, the cache is automatically deleted with it.
 * **Portable Mode Security:** If you run Flow Launcher in Portable Mode on a USB drive, the plugin continuously monitors the name of the host computer. If the computer name changes, the plugin automatically wipes the cache folder to ensure your private history data does not accidentally travel to or get exposed on a different machine.
+
+> [!WARNING]
+>
+> If you sync your Flow Launcher user data folder (`%APPDATA%\FlowLauncher`) or portable installation folder using a cloud sync provider (e.g., OneDrive, Dropbox, Google Drive), please be aware that the `Cache` folder containing your temporary browser history database **will also be synced and uploaded** to your cloud provider. If you want to keep your history strictly local to your current machine, you should exclude the `Settings\Plugins\Browser History V2\Cache` folder from your sync configuration.
 
 ## Troubleshooting
 
