@@ -23,7 +23,7 @@ The easiest way to install this plugin is directly through Flow Launcher.
 **Manual Installation:**
 1. Download [latest release](https://github.com/fahim-ahmed05/browser-history-v2/releases/latest/download/browser-history-v2.zip) from GitHub.
 2. Open Flow Launcher **Settings** and go to **Plugin Store**.
-3. Click on Install **plugin from local path button** on the top right corner.
+3. Click on **Install plugin from local path** button on the top right corner.
 4. Select the downloaded `.zip` file and click **Open**.
 5. Restart Flow Launcher.
 
