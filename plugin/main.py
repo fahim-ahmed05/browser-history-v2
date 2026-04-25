@@ -129,6 +129,24 @@ class BrowserHistory(Flox):
             except Exception:
                 pass  # Fail silently for the background custom injection so that don't block normal browsers
 
+        # Different browser variants can resolve to the same profile database path.
+        # Keep only the first instance per resolved DB path to avoid duplicate reads/caches.
+        unique_browsers = []
+        seen_db_paths = set()
+        for browser in self.browsers:
+            try:
+                db_key = str(browser.database_path.resolve()).lower()
+            except Exception:
+                db_key = str(browser.database_path).lower()
+
+            if db_key in seen_db_paths:
+                continue
+
+            seen_db_paths.add(db_key)
+            unique_browsers.append(browser)
+
+        self.browsers = unique_browsers
+
         if not self.browsers and not self.init_error:
             self.init_error = (
                 "Could not locate any supported browser profile databases."
