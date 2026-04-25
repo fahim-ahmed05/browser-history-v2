@@ -42,7 +42,6 @@ FIXED_PATHS = {
 
 FIREFOX_BASES = {
     "firefox": Path(ROAMING, "Mozilla", "Firefox", "Profiles"),
-    "firefox nightly": Path(ROAMING, "Mozilla", "Firefox", "Profiles"),
     "zen": Path(ROAMING, "zen", "Profiles"),
     "floorp": Path(ROAMING, "Floorp", "Profiles"),
     "waterfox": Path(ROAMING, "Waterfox", "Profiles"),
