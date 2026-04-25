@@ -77,10 +77,11 @@ To prevent search errors while your browser is open and actively locking the his
 
 ## Reporting Issues
 
-If the plugin isn't working as expected, or if you have an idea to make it better, please let us know on GitHub:
+If the plugin isn't working as expected, or if you have an idea to make it better, please let me know on GitHub:
 
-1. Go to the **Issues** tab on our GitHub page.
-2. Click **New Issue**.
-3. Describe what is going wrong. If you are seeing an error message in Flow Launcher, please include what it says. 
+1. Go to the **[Issues](https://github.com/fahim-ahmed05/browser-history-v2/issues)** tab on GitHub page.
+2. Click **[New Issue](https://github.com/fahim-ahmed05/browser-history-v2/issues/new/choose)**.
+3. Describe what is going wrong. If you are seeing an error message in Flow Launcher, please include what it says.
+4. Add screenshots or a short video if you can, to help show the problem.
 
 *Tip: Take a quick look at the other issues first to see if someone has already reported the same problem.*
