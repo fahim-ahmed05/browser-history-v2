@@ -15,6 +15,7 @@ The Browser History Plugin allows you to search your past web browsing directly 
 The easiest way to install this plugin is directly through Flow Launcher.
 
 **Quick Installation (Recommended):**
+
 Copy and paste the following command into Flow Launcher to install the plugin in one step:
 
 ```
@@ -22,11 +23,13 @@ pm install Browser History V2 by Fahim Ahmed
 ```
 
 **Standard Installation:**
+
 1. Open Flow Launcher Settings and click on the **Plugin Store** tab.
 2. Search for **Browser History V2**.
 3. Click **Install**. 
 
 **Manual Installation:**
+
 1. Download [latest release](https://github.com/fahim-ahmed05/browser-history-v2/releases/latest/download/browser-history-v2.zip) from GitHub.
 2. Open Flow Launcher **Settings** and go to **Plugin Store**.
 3. Click on **Install plugin from local path** button on the top right corner.
